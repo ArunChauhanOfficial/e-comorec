@@ -1,14 +1,32 @@
 generator client {
-    provider = "prisma-client-js"
+     provider = "prisma-client-js"
+    
 }
 
 datasource db {
     provider = "postgresql"
+   
+}
+
+enum  Role {
+    USER
+    ADMIN
+    SELLER
 }
 
 model User {
-    id Int @id @default(autoincrement())
+    id String @id @default(uuid())
     name String 
     email String @unique
-    password String 
+    password String
+    isVerify Boolean @default(false)
+    role  Role @default(USER)
+}
+
+
+model Otp {
+    id Int @id @default(autoincrement())
+    email String @unique
+    otp  String
+    isVerify Boolean @default(false)
 }
