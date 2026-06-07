@@ -11,7 +11,14 @@ datasource db {
 enum  Role {
     USER
     ADMIN
-    SELLER
+}
+
+
+enum PaymentsType {
+    CASH 
+    CARD 
+    UPI 
+    OTHER
 }
 
 model User {
@@ -21,7 +28,112 @@ model User {
     password String
     isVerify Boolean @default(false)
     role  Role @default(USER)
+    phoneNumber PhoneNumber[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+// relestion 
+
+    rating Rating[]
+    cart Cart?
+    orders Order[]
+    address Address[]
+    product Product[]
 }
+
+// thsi is product 
+
+model Product {
+    id Int @id @default(autoincrement())
+    productName String
+    productBrand String
+    productDiscription String
+    productPrice Float
+    productImage String
+    stock Int
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // relesitonal
+
+   
+
+   
+    userId String
+    cartId String?
+    cart Cart? @relation(fields: [cartId], references: [id])
+    user User @relation(fields: [userId], references: [id], onUpdate : Cascade)
+
+    rating Rating[]
+
+    
+}
+
+
+
+
+
+
+
+model Rating{
+    id Int  @default(autoincrement())
+    ratingValue Int // use tkae 1 to 5
+    review String?
+    createdAt DateTime @default(now())
+
+
+    // foreign keys
+
+    userId String
+    productId Int
+   
+    // relations 
+    
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    prodcut Product @relation(fields: [productId], references: [id], onDelete:  Cascade)
+
+    @@unique([userId , productId])
+}
+
+
+
+model Cart{
+    id String @id @default(uuid())
+    quntity Int
+    total Float
+
+   
+
+
+    userId String @unique
+
+    user User @relation(fields: [userId], references: [id] , onDelete: Cascade)
+
+    product Product[]
+
+    
+}
+
+
+model Order{
+    id Int @id @default(autoincrement())
+    orderNumber String @unique
+    userId String
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    payment Payment[]
+
+}
+
+
+model Payment {
+    id Int @id @default(autoincrement())
+    paymentsType PaymentsType @default(UPI)
+    paymentsStatus String
+    transactionId String
+    orderId Int
+    order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+
 
 
 model Otp {
@@ -29,4 +141,23 @@ model Otp {
     email String @unique
     otp  String
     isVerify Boolean @default(false)
+
+
+}
+
+
+
+model Address {
+    id Int @id @default(autoincrement())
+    isAddress String
+    userId String
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PhoneNumber{
+    id Int @id @default(autoincrement())
+    number String
+    userId String
+    user User @relation(fields: [userId], references: [id] , onDelete: Cascade)
+
 }

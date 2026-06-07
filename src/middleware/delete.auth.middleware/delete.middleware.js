@@ -3,17 +3,11 @@ import jwt from "jsonwebtoken";
 
 
 
-const authMiddlewere = async (req , res ,next) =>{
-     const token =  req.cookies?.otptoken || req.cookies?.token
-
+const deleteMiddlewere = async (req , res ,next) =>{
+     const token =  req.cookies?.userDelete
    
-    if (!token && req.headers.authorization) {
-            if (req.headers.authorization.startsWith("Bearer ")) {
-                token = req.headers.authorization.split(" ")[1];
-            } else {
-                token = req.headers.authorization;
-            }
-        }
+   
+     
 
     try {
 
@@ -43,4 +37,4 @@ const authMiddlewere = async (req , res ,next) =>{
     }
 }
 
-export default authMiddlewere;
+export default deleteMiddlewere;

@@ -5,3 +5,6 @@ node_modules
 /generated/prisma
 
 /src/generated/prisma
+parsnol.md
+/src/prisma/seed.md
+/API_DOCUMENTATION.md

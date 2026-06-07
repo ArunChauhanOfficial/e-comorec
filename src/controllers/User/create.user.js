@@ -1,3 +1,4 @@
+import { Role } from "@prisma/client";
 import {prisma} from "../../db/prisma.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken"
@@ -14,19 +15,7 @@ const CreateUser = async (req , res) => {
     }
 
     try {
-     const isUser = await prisma.user.findUnique({
-      where : {
-         email : isOtp.email
-      }
-   })
-
-
-   if(isUser){
-       return res.status(400).json({
-            message : "user already exist please login",
-            seccuss : false
-         })
-   }
+     
 
     const isOtp = await prisma.otp.findUnique({
       where : {
@@ -42,7 +31,20 @@ const CreateUser = async (req , res) => {
          seccuss : false
       })
    }
-        
+   
+   const isUser = await prisma.user.findUnique({
+      where : {
+         email : isOtp.email
+      }
+   })
+
+
+   if(isUser){
+       return res.status(400).json({
+            message : "user already exist please login",
+            seccuss : false
+         })
+   }
    
 
    const encryptPassword = await bcrypt.hash(password, 10)
@@ -52,7 +54,8 @@ const CreateUser = async (req , res) => {
       data : {
            name : name,
             email : isOtp.email,
-            password : encryptPassword
+            password : encryptPassword,
+            
       }
    })
 
@@ -64,9 +67,10 @@ const CreateUser = async (req , res) => {
    })
    
 
+   
    const token = jwt.sign(
       {
-         id : user.id, email : user.email
+         id : user.id, email : user.email , role :  user.role
       },
       process.env.JST_KEY
    )

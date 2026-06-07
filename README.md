@@ -1,18 +1,21 @@
 # E-Commerce Backend API
 
-A Node.js Express backend for an e-commerce application with user authentication, OTP verification, and product management.
+A robust Node.js Express backend for an e-commerce application with comprehensive user authentication, OTP verification, product management, and admin controls.
 
 ## 🎯 Features
 
 - **User Authentication**: Registration and login with JWT tokens
-- **OTP Verification**: Email-based OTP generation and verification
-- **Email Validation**: Deep email validation service
-- **Password Security**: Bcrypt-based password hashing
+- **OTP Verification**: Email-based OTP generation and verification for secure authentication
+- **Email Validation**: Deep email validation service with comprehensive checks
+- **Password Security**: bcryptjs-based password hashing and encryption
 - **CORS Support**: Configured for cross-origin requests
-- **Product Management**: (Foundation ready for expansion)
-- **Order Management**: (Foundation ready for expansion)
+- **Product Management**: Full CRUD operations for products
+- **Order Management**: Order tracking and management
+- **Admin Panel**: Admin verification and management capabilities
+- **User Profile Management**: Address, phone, and account management
+- **File Upload**: Multer integration for file uploads
 - **PostgreSQL Database**: Reliable relational database
-- **Prisma ORM**: Type-safe database access
+- **Prisma ORM**: Type-safe database access with migrations
 
 ## 🛠 Tech Stack
 
@@ -117,13 +120,28 @@ http://localhost:7400/api
 ### OTP Routes (`/api/otp`)
 - `POST /send` - Send OTP to email
 - `POST /verify` - Verify OTP code
+- `POST /delete` - Delete OTP for user
 
 ### User Routes (`/api/user`)
-- `POST /register` - Register new user (requires auth middleware)
+- `POST /register` - Register new user
 - `POST /login` - Login user
+- `GET /` - Get user profile (auth required)
+- `PUT /address` - Update user address (auth required)
+- `PUT /phone` - Update user phone (auth required)
+- `DELETE /` - Delete user account (auth required)
 
-### Verification Routes (`/api/verification`)
+### Verification Routes (`/api/verifition`)
 - `POST /verify` - Verify OTP for email verification
+
+### Admin Routes (`/api/admin`)
+- `POST /login` - Admin login
+- `POST /verify` - Admin verification
+
+### Product Routes (`/api/product`)
+- `POST /create` - Create new product (admin auth required)
+- `GET /list` - Get all products
+- `PUT /update/:id` - Update product (admin auth required)
+- `DELETE /delete/:id` - Delete product (admin auth required)
 
 For detailed API documentation, see [API_DOCUMENTATION.md](./API_DOCUMENTATION.md)
 
@@ -134,20 +152,119 @@ backend/
 ├── src/
 │   ├── app.js                          # Express app configuration
 │   ├── controllers/                    # Business logic
+│   │   ├── admin/
+│   │   │   ├── admin.verify.js
+│   │   │   └── login.admin.js
 │   │   ├── Otp/
 │   │   │   ├── otp.create.js
-│   │   │   └── otp.verify.js
+│   │   │   ├── otp.verify.js
+│   │   │   └── userDelete.otp.js
 │   │   ├── Product/
-│   │   └── User/
-│   │       ├── create.user.js
-│   │       ├── login.user.js
-│   │       └── verify.user.js
+│   │   │   ├── create.product.js
+│   │   │   ├── delete.product.js
+│   │   │   ├── list.product.js
+│   │   │   └── update.product.js
+│   │   ├── User/
+│   │   │   ├── address.user.js
+│   │   │   ├── create.user.js
+│   │   │   ├── delete.user.js
+│   │   │   ├── login.user.js
+│   │   │   ├── phone.user.js
+│   │   │   └── verify.user.js
+│   │   └── orders/
 │   ├── db/
-│   │   └── prisma.js
+│   │   └── prisma.js                   # Prisma client initialization
 │   ├── middleware/
-│   │   └── auth.middleware/
-│   │       └── auth.middleware.js
+│   │   ├── auth.middleware/
+│   │   │   └── auth.middleware.js      # JWT authentication middleware
+│   │   └── delete.auth.middleware/
+│   │       └── delete.middleware.js
 │   ├── routes/
+│   │   ├── admin/
+│   │   │   └── admin.route.js
+│   │   ├── otp/
+│   │   │   └── otp.route.js
+│   │   ├── product/
+│   │   │   └── product.route.js
+│   │   ├── user/
+│   │   │   └── user.route.js
+│   │   └── userVerifiyd/
+│   │       └── user.verify.route.js
+│   ├── service/
+│   │   ├── email_validator/
+│   │   │   └── emailValid.service.js
+│   │   ├── emailSender/
+│   │   │   └── emailler.service.js
+│   │   └── multer.service/
+│   │       ├── upload.multer.js
+│   │       └── cloudestore/
+│   └── utils/
+│       └── otpgenerater/
+│           └── otpgenrater.service.js
+├── prisma/
+│   ├── schema.prisma                   # Database schema definition
+│   └── generated/                      # Prisma client generated files
+├── cloudestore/                        # File storage directory
+├── .env                                # Environment variables
+├── package.json                        # Dependencies
+├── server.js                           # Server entry point
+└── API_DOCUMENTATION.md                # Complete API documentation
+```
+
+## 🔐 Authentication
+
+This backend uses **JWT (JSON Web Tokens)** for authentication:
+
+1. Users register and login to receive a JWT token
+2. JWT tokens are sent in the `Authorization` header as: `Bearer <token>`
+3. Protected routes require valid JWT tokens
+4. Tokens expire after 7 days (configurable via `JWT_EXPIRE`)
+
+## 🔑 Key Technologies
+
+- **Express.js**: Fast and minimalist web framework
+- **Prisma**: Type-safe ORM with automatic migrations
+- **PostgreSQL**: Reliable relational database
+- **JWT**: Secure token-based authentication
+- **Nodemailer**: Email sending service
+- **Multer**: File upload middleware
+- **bcryptjs**: Password hashing and encryption
+
+## 📝 Development Workflow
+
+1. Create/modify files in the `src/` directory
+2. Use `npm run dev` for development with hot reload
+3. Environment changes require server restart
+4. Database schema changes use Prisma migrations
+
+## 🐛 Troubleshooting
+
+### Port Already in Use
+```bash
+# Change PORT in .env file or kill process using port 7400
+kill -9 $(lsof -t -i:7400)
+```
+
+### Database Connection Issues
+- Ensure PostgreSQL is running
+- Verify `DATABASE_URL` in `.env` is correct
+- Check PostgreSQL credentials
+
+### Prisma Client Errors
+```bash
+npx prisma generate
+npx prisma migrate dev
+```
+
+## 📞 Support & Documentation
+
+- **API Docs**: See [API_DOCUMENTATION.md](./API_DOCUMENTATION.md)
+- **Setup Guide**: See [SETUP.md](./SETUP.md)
+- **Issues**: Check server logs in terminal
+
+## 📄 License
+
+ISC License - See package.json for details
 │   │   ├── otp/
 │   │   ├── product/
 │   │   ├── user/
